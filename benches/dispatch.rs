@@ -15,7 +15,7 @@ fn bench_quadratic(c: &mut Criterion) {
         // that we re-use this RNG in all the benches
         let mut rng = Pcg64::seed_from_u64(42);
 
-        let function = Quadratic::alloc_stack(2., 1., 0.);
+        let function = Quadratic::stack_alloc(2., 1., 0.);
 
         b.iter(|| gradient_descent_static(&function, -0.5..=0.5, 10_000, 0.01, &mut rng));
     });
@@ -24,7 +24,7 @@ fn bench_quadratic(c: &mut Criterion) {
     group.bench_function("Dynamic Dispatch", |b| {
         let mut rng = Pcg64::seed_from_u64(42);
 
-        let function = Quadratic::alloc_heap(2., 1., 0.);
+        let function = Quadratic::heap_alloc(2., 1., 0.);
 
         b.iter(|| gradient_descent_dynamic(function.as_ref(), -0.5..=0.5, 10_000, 0.01, &mut rng));
     });

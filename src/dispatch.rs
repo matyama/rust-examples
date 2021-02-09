@@ -1,17 +1,22 @@
 //! This example demonstrates differences between a *static dispatch* and
 //! *dynamic dispatch* of method calls.
 
+#[allow(unused_imports)]
 use rand::{Rng, SeedableRng};
+#[allow(unused_imports)]
 use rand_pcg::Pcg64;
 
 use std::boxed::Box;
 use std::marker::Sized;
 use std::ops::RangeInclusive;
 
+/// Interface of a real 1D differentiable function
 pub trait Differentiable {
+    /// Compute the first derivative of this function at given point `x`
     fn grad(&self, x: f64) -> f64;
 }
 
+#[allow(dead_code)]
 pub struct Quadratic {
     a: f64,
     b: f64,
@@ -20,12 +25,12 @@ pub struct Quadratic {
 
 impl Quadratic {
     #[inline(always)]
-    pub fn alloc_stack(a: f64, b: f64, c: f64) -> Self {
+    pub fn stack_alloc(a: f64, b: f64, c: f64) -> Self {
         Self { a, b, c }
     }
 
     #[inline(always)]
-    pub fn alloc_heap(a: f64, b: f64, c: f64) -> Box<Self> {
+    pub fn heap_alloc(a: f64, b: f64, c: f64) -> Box<Self> {
         Box::new(Self { a, b, c })
     }
 }
@@ -37,6 +42,7 @@ impl Differentiable for Quadratic {
     }
 }
 
+#[allow(dead_code)]
 enum Trigonometric {
     Sine,
     Cosine,
@@ -52,6 +58,19 @@ impl Differentiable for Trigonometric {
     }
 }
 
+/// Gradient Descent that finds a minimum of a statically defined function `f` on given `interval`.
+///
+/// Static dispatch means that this function i *monomorphized* and thus the type of `f` is known at
+/// compilation time. Monomorphization means that the compiler duplicates this function for every
+/// type implementing `Differentiable` and for each copy substitutes the concrete type for the
+/// generic parameter `F`.
+///
+/// Call `f.grad(x)` is direct and the method address is explicitly mentioned in the assembly code.
+/// Furthermore, trait implementations can benefit from inlining.
+///
+/// There's, however, also a disadvantage - one can't put different implementations into let's say a
+/// collection (e.g. `Vec`) that expects homogeneous types. Such a structure need a different kind \
+/// of polymorphism which is provided by dynamic dispatch.
 pub fn gradient_descent_static<F, R>(
     f: &F,
     interval: RangeInclusive<f64>,
@@ -64,12 +83,21 @@ where
     R: Rng + ?Sized,
 {
     let mut x = rng.gen_range(interval);
-    for i in 0..max_iters {
-        x = x - eta * f.grad(x);
+    for _ in 0..max_iters {
+        // Note that `F::grad(f, x)` works as well due to static dispatch and monomorphization.
+        x -= eta * f.grad(x);
     }
     x
 }
 
+/// Gradient Descent that finds a minimum of a dynamically defined function `f` on given `interval`.
+///
+/// Dynamic dispatch means that the actual type of `f` (or more precisely of the `grad` method) is
+/// determined at runtime. Call `f.grad(x)` is indirect via a *vtable* - a lookup table that holds
+/// memory addresses of `grad` methods for each type implementing `Differentiable`.
+///
+/// Contrary to the statically dispatched version, this implementation `f` only provides the public
+/// interface defined by `Differentiable` trait. Moreover any inlining on `dyn` traits is ignored.
 pub fn gradient_descent_dynamic<R>(
     f: &dyn Differentiable,
     interval: RangeInclusive<f64>,
@@ -81,8 +109,8 @@ where
     R: Rng + ?Sized,
 {
     let mut x = rng.gen_range(interval);
-    for i in 0..max_iters {
-        x = x - eta * f.grad(x);
+    for _ in 0..max_iters {
+        x -= eta * f.grad(x);
     }
     x
 }
@@ -141,5 +169,22 @@ mod tests {
         let function = Box::new(function);
         let x_min = gradient_descent_dynamic(function.as_ref(), -5.0..=3.5, 10_000, 0.01, &mut rng);
         assert_delta!(FRAC_PI_2, x_min, EPS);
+    }
+
+    #[test]
+    fn dynamic_polymorphism() {
+        let mut rng = Pcg64::seed_from_u64(42);
+
+        // Define a collection of `Differentiable` functions that are heap-allocated
+        //  - Note that it's not possible to construct this vector with a static polymorphic type
+        let functions: Vec<Box<dyn Differentiable>> = vec![
+            Box::new(Trigonometric::Sine),
+            Box::new(Trigonometric::Cosine),
+        ];
+
+        // Test that GD with dynamic dispatch works
+        for function in functions.into_iter() {
+            gradient_descent_dynamic(function.as_ref(), -5.0..=3.5, 10_000, 0.01, &mut rng);
+        }
     }
 }
