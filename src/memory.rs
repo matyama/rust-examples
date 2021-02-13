@@ -20,10 +20,19 @@ pub fn borrow_point_mutably(p: &mut Point2D) {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct RGBColour(u8, u8, u8);
+pub struct RGBColor(u8, u8, u8);
 
-pub fn show_colour(colour: RGBColour) {
-    println!("The colour is {:?}", colour)
+pub fn show_color(color: RGBColor) {
+    println!("The color is {:?}", color)
+}
+
+#[derive(Debug)]
+pub struct Palette<'a> {
+    colors: &'a [RGBColor],
+}
+
+pub fn show_palette(palette: &Palette) {
+    println!("Color palette: {:?}", palette);
 }
 
 #[cfg(test)]
@@ -66,15 +75,39 @@ mod tests {
 
     #[test]
     fn call_by_value() {
-        let colour = RGBColour(128, 0, 128);
+        let color = RGBColor(128, 0, 128);
 
-        // Function `show_color` takes ownership of the colour argument. However, `RGBColour` struct
+        // Function `show_color` takes ownership of the colour argument. However, `RGBColor` struct
         // derives `Copy` trait which means that this struct is easy and fast to copy and pass by
         // value (this is how primitive types such as integers and floats are handled).
-        show_colour(colour);
+        show_color(color);
 
         // Because the ownership has not been moved from `colour` (rather a copy has been created
         // during previous function call), following call is safe and thus compiles.
-        show_colour(colour);
+        show_color(color);
+    }
+
+    #[test]
+    fn lifetimes() {
+        let colors = vec![RGBColor(1, 1, 1), RGBColor(2, 2, 2)];
+
+        // Lifetimes define the minimum span of how long a piece of memory must remain valid so
+        // that it does not outlive some other memory it references.
+        {
+            // In this example a palette references a vector of colors. This works because we've
+            // bound the palette lifetime to the lifetime of the color vector.
+            let palette = Palette { colors: &colors };
+
+            // Releasing colors (e.g. with an explicit `drop(colors);`) before this call would be
+            // prevented by the Borrow Checker for lifetime validation.
+            show_palette(&palette);
+
+            // At this point palette is dropped.
+        }
+
+        // Even though the palette was freed, `colors` is still points to valid memory.
+        for color in colors.into_iter() {
+            show_color(color);
+        }
     }
 }
