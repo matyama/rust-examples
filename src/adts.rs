@@ -29,42 +29,42 @@ impl<'a, K: PartialEq + Eq, V> Tree<'a, K, V> {
         // Pattern matching is ideal for working with ADTs. Also notice that `match` is an
         // expression that returns the last expression from the matched case.
         match self {
-            // First pattern checks for `Leaf` nodes and unwraps the type to its components.
+            // First pattern checks for any node (`Leaf` or inner `Node`) that has matching key and
+            // unwraps the type to its components. As it's shown here, we can match on multiple
+            // types in single pattern using `|`.
+            //
             // It's also possible to match a component on particular value and/or add guards which
-            // are boolean conditions on binded variables.
-            Self::Leaf(key, data) => {
-                // In leaf nodes we simply compare the keys
-                if key == lookup_key {
-                    Some(*data)
-                } else {
-                    None
-                }
-            }
-
-            // Next pattern is for the inner `Node`. Since the compiler knows we've exausted all
-            // possibilities for the `Tree` ADT, we don't need a default branch.
-            Self::Node {
+            // are boolean conditions on binded variables - which we use here.
+            Self::Leaf(key, data)
+            | Self::Node {
                 key,
                 data,
+                left: _,
+                right: _,
+            } if key == lookup_key => Some(*data),
+
+            // Patterns are checked sequentially, so any other leaf node can't have matching key
+            Self::Leaf(_, _) => None,
+
+            // If the key was not found in an inner node, we check left and right sub-trees.
+            //
+            // Since the compiler knows we've exausted all possibilities for the `Tree` ADT,
+            // we don't need a default branch.
+            Self::Node {
+                key: _,
+                data: _,
                 left,
                 right,
             } => {
-                // In inner nodes we first check if this node contins the key we're looking for
-                if key == lookup_key {
-                    return Some(*data);
-                }
-
-                // If the key was not found in this node we check left and right sub-trees
-
                 // Here we use the `if let` matching to check the result of the left sub-tree.
                 // We can name a pattern (in this case `r`) and since we don't care about the
                 // contents of the `Some` option, we can ignore it with a placeholder `_`.
                 // One could say that we're only interested in the structure, not the data.
                 if let r @ Some(_) = left.search(lookup_key) {
-                    return r;
+                    r
+                } else {
+                    right.search(lookup_key)
                 }
-
-                right.search(lookup_key)
             }
         }
     }
