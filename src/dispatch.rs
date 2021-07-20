@@ -1,14 +1,7 @@
 //! This example demonstrates differences between a *static dispatch* and
 //! *dynamic dispatch* of method calls.
 
-#[allow(unused_imports)]
-use rand::{Rng, SeedableRng};
-#[allow(unused_imports)]
-use rand_pcg::Pcg64;
-
 use std::boxed::Box;
-use std::marker::Sized;
-use std::ops::RangeInclusive;
 
 /// Interface of a real 1D differentiable function
 pub trait Differentiable {
@@ -71,18 +64,11 @@ impl Differentiable for Trigonometric {
 /// There's, however, also a disadvantage - one can't put different implementations into let's say a
 /// collection (e.g. `Vec`) that expects homogeneous types. Such a structure need a different kind \
 /// of polymorphism which is provided by dynamic dispatch.
-pub fn gradient_descent_static<F, R>(
-    f: &F,
-    interval: RangeInclusive<f64>,
-    max_iters: usize,
-    eta: f64,
-    rng: &mut R,
-) -> f64
+pub fn gradient_descent_static<F>(f: &F, max_iters: usize, eta: f64) -> f64
 where
     F: Differentiable,
-    R: Rng + ?Sized,
 {
-    let mut x = rng.gen_range(interval);
+    let mut x = 0.0;
     for _ in 0..max_iters {
         // Note that `F::grad(f, x)` works as well due to static dispatch and monomorphization.
         x -= eta * f.grad(x);
@@ -98,17 +84,8 @@ where
 ///
 /// Contrary to the statically dispatched version, this implementation `f` only provides the public
 /// interface defined by `Differentiable` trait. Moreover any inlining on `dyn` traits is ignored.
-pub fn gradient_descent_dynamic<R>(
-    f: &dyn Differentiable,
-    interval: RangeInclusive<f64>,
-    max_iters: usize,
-    eta: f64,
-    rng: &mut R,
-) -> f64
-where
-    R: Rng + ?Sized,
-{
-    let mut x = rng.gen_range(interval);
+pub fn gradient_descent_dynamic(f: &dyn Differentiable, max_iters: usize, eta: f64) -> f64 {
+    let mut x = 0.0;
     for _ in 0..max_iters {
         x -= eta * f.grad(x);
     }
@@ -132,8 +109,6 @@ mod tests {
 
     #[test]
     fn quadratic() {
-        let mut rng = Pcg64::seed_from_u64(42);
-
         // min { 2*x^2 - x } = -1/8 at x = 1/4
         let function = Quadratic {
             a: 2.,
@@ -141,40 +116,36 @@ mod tests {
             c: 0.,
         };
 
-        // Minimize on interval [-1/2, 1/2] for 10k iterations with step size 0.01
+        // Minimize for 10k iterations with step size 0.01
 
         // Test GD with static dispatch
-        let x_min = gradient_descent_static(&function, -0.5..=0.5, 10_000, 0.01, &mut rng);
+        let x_min = gradient_descent_static(&function, 10_000, 0.01);
         assert_delta!(0.25, x_min, EPS);
 
         // Test GD with dynamic dispatch
         let function = Box::new(function);
-        let x_min = gradient_descent_dynamic(function.as_ref(), -0.5..=0.5, 10_000, 0.01, &mut rng);
+        let x_min = gradient_descent_dynamic(function.as_ref(), 10_000, 0.01);
         assert_delta!(0.25, x_min, EPS);
     }
 
     #[test]
     fn trigonometric() {
-        let mut rng = Pcg64::seed_from_u64(42);
-
         let function = Trigonometric::Sine;
 
-        // Minimize on interval [-5, 3.5] for 10k iterations with step size 0.01
+        // Minimize for 10k iterations with step size 0.01
 
         // Test GD with static dispatch
-        let x_min = gradient_descent_static(&function, -5.0..=3.5, 10_000, 0.01, &mut rng);
+        let x_min = gradient_descent_static(&function, 10_000, 0.01);
         assert_delta!(FRAC_PI_2, x_min, EPS);
 
         // Test GD with dynamic dispatch
         let function = Box::new(function);
-        let x_min = gradient_descent_dynamic(function.as_ref(), -5.0..=3.5, 10_000, 0.01, &mut rng);
+        let x_min = gradient_descent_dynamic(function.as_ref(), 10_000, 0.01);
         assert_delta!(FRAC_PI_2, x_min, EPS);
     }
 
     #[test]
     fn dynamic_polymorphism() {
-        let mut rng = Pcg64::seed_from_u64(42);
-
         // Define a collection of `Differentiable` functions that are heap-allocated
         //  - Note that it's not possible to construct this vector with a static polymorphic type
         let functions: Vec<Box<dyn Differentiable>> = vec![
@@ -184,7 +155,7 @@ mod tests {
 
         // Test that GD with dynamic dispatch works
         for function in functions.into_iter() {
-            gradient_descent_dynamic(function.as_ref(), -5.0..=3.5, 10_000, 0.01, &mut rng);
+            gradient_descent_dynamic(function.as_ref(), 10_000, 0.01);
         }
     }
 }
