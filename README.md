@@ -6,6 +6,7 @@ This repository contains support materials for Rust tech-talks explaining variou
 ## Topics and Concepts
 * *Static* vs *dynamic* dispatch
 * *Ownership* and memory management
+	* `Box`, `Rc` and their `Clone` semantics
 * Type system features:
 	* Enums as Algebraic Data Types
 	* Pattern matching
