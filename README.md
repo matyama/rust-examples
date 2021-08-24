@@ -6,7 +6,7 @@ This repository contains support materials for Rust tech-talks explaining variou
 ## Topics and Concepts
 * *Static* vs *dynamic* dispatch
 * *Ownership* and memory management
-	* `Box`, `Rc` and their `Clone` semantics
+	* `Box`, `Rc` and `&` and their `Clone` semantics
 * Type system features:
 	* Enums as Algebraic Data Types
 	* Pattern matching
@@ -15,3 +15,5 @@ This repository contains support materials for Rust tech-talks explaining variou
 	* (Bounded) Parametric polymorphism
 	* Zero-cost abstraction
 	* Types as carriers of (static) semantics
+* Functional design patterns:
+	* Traversable types implementing `FromIterator` and using `collect`
