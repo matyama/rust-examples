@@ -12,10 +12,12 @@ edition = "2018"
 [dependencies]
 
 [dev-dependencies]
-criterion = "0.3"
-
 # Criterion Benchmarks - https://bheisler.github.io/criterion.rs/book/criterion_rs.html
 #  - Additionally, install and run via https://crates.io/crates/cargo-criterion
+criterion = "0.3"
+
+# Fixture-based test framework for Rust: https://github.com/la10736/rstest
+rstest = "0.11"
 
 [[bench]]
 name = "dispatch"

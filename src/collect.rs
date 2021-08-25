@@ -1,3 +1,8 @@
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::{BufReader, Result};
+use std::path::Path;
+
 fn first(input: &str) -> Option<char> {
     input.chars().next()
 }
@@ -19,12 +24,62 @@ pub fn collect_initials(names: Vec<&str>) -> Option<Vec<char>> {
     names.into_iter().map(first).collect()
 }
 
+fn read_file<P: AsRef<Path>>(path: P) -> Result<String> {
+    let file = File::open(path)?;
+    let mut buf_reader = BufReader::new(file);
+    let mut contents = String::new();
+    buf_reader.read_to_string(&mut contents)?;
+    Result::Ok(contents)
+}
+
+/// Traversing a [Result] works analogously to an [Option] since a result is basically an option
+/// where the `None` case is some more specific type.
+///
+/// Other languages typically implement a general `.traverse(f)` method, so it might seem that
+/// `collect` is not as expressive (it's equivalent to `.sequence`). However, `.traverse(f)` is
+/// equivalent to `.map(f).sequence`. See the reference to *Typelevel Cats* for more.
+///
+/// Note that [std::io::Result] is just ordinary result with io error `Result<T, std::io::Error>`.
+pub fn read_files<P: AsRef<Path>>(paths: &[P]) -> Result<Vec<String>> {
+    paths.iter().map(read_file).collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::*;
 
-    #[test]
-    fn traversing_options() {
+    use std::borrow::Borrow;
+    use std::env;
+    use std::path::PathBuf;
+
+    struct TempFile(PathBuf);
+
+    impl Drop for TempFile {
+        fn drop(&mut self) {
+            std::fs::remove_file(&self.0).unwrap_or(());
+        }
+    }
+
+    impl AsRef<Path> for TempFile {
+        fn as_ref(&self) -> &Path {
+            &self.0
+        }
+    }
+
+    // Based on https://github.com/la10736/rstest/blob/master/notes.md
+    #[fixture]
+    fn temp_file(#[default("test")] name: &str, #[default("")] text: &str) -> TempFile {
+        let mut path = env::temp_dir();
+        path.push(name);
+        File::create(&path)
+            .and_then(|mut fd| fd.write(text.as_bytes()))
+            .expect("Failed to create temp file");
+        TempFile(path)
+    }
+
+    #[rstest]
+    fn traverse_options() {
         let success = collect_initials(vec!["Alice", "Bob", "Charlie"]);
         assert_eq!(success, Some(vec!['A', 'B', 'C']));
 
@@ -35,5 +90,24 @@ mod tests {
         assert_eq!(failure, None);
     }
 
-    // TODO: Result<T, E>
+    #[rstest]
+    fn traverse_results(
+        #[from(temp_file)]
+        #[with("test1", "some text")]
+        tmp1: TempFile,
+        #[from(temp_file)]
+        #[with("test2", "other text")]
+        tmp2: TempFile,
+    ) {
+        let success =
+            read_files(&[tmp1.borrow(), tmp2.borrow()]).expect("This case should return Ok");
+        assert_eq!(
+            success,
+            vec!["some text".to_string(), "other text".to_string()]
+        );
+
+        let non_existing = TempFile(PathBuf::from("non_existing_file"));
+        let failure = read_files(&[tmp1, tmp2, non_existing]);
+        assert!(failure.is_err());
+    }
 }
