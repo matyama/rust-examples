@@ -3,10 +3,6 @@ use std::io::prelude::*;
 use std::io::{BufReader, Result};
 use std::path::Path;
 
-fn first(input: &str) -> Option<char> {
-    input.chars().next()
-}
-
 /// Traverse a collection of input values and apply an effect to item that may fail (take the
 /// first character from each string slice, resulting in an `Option<char>`).
 ///
@@ -24,12 +20,8 @@ pub fn collect_initials(names: Vec<&str>) -> Option<Vec<char>> {
     names.into_iter().map(first).collect()
 }
 
-fn read_file<P: AsRef<Path>>(path: P) -> Result<String> {
-    let file = File::open(path)?;
-    let mut buf_reader = BufReader::new(file);
-    let mut contents = String::new();
-    buf_reader.read_to_string(&mut contents)?;
-    Result::Ok(contents)
+fn first(input: &str) -> Option<char> {
+    input.chars().next()
 }
 
 /// Traversing a [Result] works analogously to an [Option] since a result is basically an option
@@ -42,6 +34,13 @@ fn read_file<P: AsRef<Path>>(path: P) -> Result<String> {
 /// Note that [std::io::Result] is just ordinary result with io error `Result<T, std::io::Error>`.
 pub fn read_files<P: AsRef<Path>>(paths: &[P]) -> Result<Vec<String>> {
     paths.iter().map(read_file).collect()
+}
+fn read_file<P: AsRef<Path>>(path: P) -> Result<String> {
+    let file = File::open(path)?;
+    let mut buf_reader = BufReader::new(file);
+    let mut contents = String::new();
+    buf_reader.read_to_string(&mut contents)?;
+    Result::Ok(contents)
 }
 
 #[cfg(test)]
@@ -109,5 +108,16 @@ mod tests {
         let non_existing = TempFile(PathBuf::from("non_existing_file"));
         let failure = read_files(&[tmp1, tmp2, non_existing]);
         assert!(failure.is_err());
+    }
+
+    #[rstest]
+    fn build_non_linear_structure() {
+        use std::collections::BinaryHeap;
+
+        // As mentioned above, `collect` works for any implementation of the `FromIterator` trait.
+        // This allows us to transform sequential data (an `Iterator`) into any data structure -
+        // event non-linear one such as `BinaryHeap` (`BinaryHeap` implements `FromIterator`).
+        let heap = vec![1, -2, 5, 4].into_iter().collect::<BinaryHeap<i32>>();
+        assert_eq!(heap.into_iter().collect::<Vec<_>>(), vec![5, 4, 1, -2]);
     }
 }
