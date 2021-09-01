@@ -15,5 +15,7 @@ This repository contains support materials for Rust tech-talks explaining variou
 	* (Bounded) Parametric polymorphism
 	* Zero-cost abstraction
 	* Types as carriers of (static) semantics
+* Metaprogramming:
+	* Declarative macros
 * Functional design patterns:
 	* Traversable types implementing `FromIterator` and using `collect`
