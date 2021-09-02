@@ -1,4 +1,4 @@
-/// An enum representing an Binary Search Tree (BST) Algebraic Data Type (ADT)
+/// An enum representing an Binary Tree Algebraic Data Type (ADT)
 ///
 /// This enum defined two distinct types (variants), each of different shape and size:
 ///   1. The `Leaf` representing a leaf node that wraps `(key, ref data)`
@@ -60,8 +60,8 @@ impl<'a, K: PartialEq + Eq, V> Tree<'a, K, V> {
                 // We can name a pattern (in this case `r`) and since we don't care about the
                 // contents of the `Some` option, we can ignore it with a placeholder `_`.
                 // One could say that we're only interested in the structure, not the data.
-                if let r @ Some(_) = left.search(lookup_key) {
-                    r
+                if let data @ Some(_) = left.search(lookup_key) {
+                    data
                 } else {
                     right.search(lookup_key)
                 }
@@ -86,7 +86,7 @@ mod test {
             "3rd leaf",
         ];
 
-        // Build small binary search tree with with nodes allocated on the heap via `Box`.
+        // Build small binary tree with with nodes allocated on the heap via `Box`.
         let tree = Tree::Node {
             key: 42,
             data: &data[0],
