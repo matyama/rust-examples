@@ -6,12 +6,24 @@ use std::cmp::Ordering;
 pub struct Positive(f64);
 
 impl Positive {
-    // This forces clients to always check if it's ok
+    /// This forces clients to always check if it's ok. One cannot initialize a tuple struct which
+    /// contains private fields.
+    ///
+    /// So the following code **does not compile** because `f64` is a private field in [Positive].
+    /// ```compile_fail
+    /// use rust_examples::typing::Positive;
+    /// let _ = Positive(-24.);
+    /// ```
+    /// The only option is then to use this factory method and therefore check the result.
+    /// ```
+    /// use rust_examples::typing::Positive;
+    /// assert_eq!(Positive::new(-24.), None)
+    /// ```
     pub fn new(number: f64) -> Option<Self> {
         if !number.is_sign_positive() {
             return None;
         }
-        Some(Positive(number))
+        Some(Self(number))
     }
 
     // Note: This is not OOP, I can call `Positive::as_u32(p)`
@@ -70,18 +82,19 @@ pub fn safe_cmp_f64(a: Positive, b: Positive) -> Ordering {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::*;
 
-    #[test]
-    fn it_works() {
-        let a = Positive::new(42.).expect("This is a positive float!");
-        let b = Positive::new(24.).expect("This is a positive float!");
-
-        // You cannot initialize a tuple struct which contains private fields.
-        // So, one is forced to use the factory method and therefore check the result.
-        // let n = Positive(-24.);
-
-        assert_eq!(Ordering::Greater, safe_cmp_f64(a, b));
-        assert_eq!(Ordering::Less, safe_cmp_f64(b, a));
-        assert_eq!(Ordering::Equal, safe_cmp_f64(a, a));
+    #[rstest]
+    #[case::greater(2., 1., Ordering::Greater)]
+    #[case::less(1., 2., Ordering::Less)]
+    #[case::equal(1., 1., Ordering::Equal)]
+    #[should_panic]
+    #[case::error(2., -1., Ordering::Greater)]
+    #[should_panic]
+    #[case::error(-1., 2., Ordering::Less)]
+    fn safe_float_cmp(#[case] a: f64, #[case] b: f64, #[case] expected: Ordering) {
+        let a = Positive::new(a).expect(&format!("a shold be a positive float, got {}", a));
+        let b = Positive::new(b).expect(&format!("b shold be a positive float, got {}", b));
+        assert_eq!(safe_cmp_f64(a, b), expected);
     }
 }
