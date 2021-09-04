@@ -49,6 +49,31 @@ macro_rules! impl_max_value {
 // This is the where we actually create all the `impl`s
 impl_max_value!(u32, i32, u64, i64);
 
+/// Macro that counts any input tokens at compilation time (i.e. resulting in a `const` value) with
+/// no residual memory footprint.
+/// ```
+/// use rust_examples::{count, substitute};
+///
+/// const COUNT: usize = count!(1, 2, 3);
+/// ```
+///
+/// See the [book about macros](https://danielkeep.github.io/tlborm/book/blk-counting.html) for
+/// more and [this video](https://www.youtube.com/watch?v=q6paRBbLgNw&t=4380s) for implementation
+/// details.
+#[macro_export]
+macro_rules! count {
+    ($($item:tt),*) => {
+        <[()]>::len(&[$(substitute!($item ())),*])
+    };
+}
+
+#[macro_export]
+macro_rules! substitute {
+    ($_t:tt $sub:expr) => {
+        $sub
+    };
+}
+
 #[macro_use]
 #[cfg(test)]
 mod tests {
@@ -67,5 +92,12 @@ mod tests {
         assert_eq!(i32::max_value(), i32::MAX);
         assert_eq!(u64::max_value(), u64::MAX);
         assert_eq!(i64::max_value(), i64::MAX);
+    }
+
+    #[rstest]
+    fn count_items() {
+        assert_eq!(count!(), 0);
+        assert_eq!(count!(1), 1);
+        assert_eq!(count!([1, 2], [], [0, 1, 3]), 3);
     }
 }
