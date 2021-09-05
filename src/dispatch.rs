@@ -147,7 +147,7 @@ mod tests {
     #[test]
     fn dynamic_polymorphism() {
         // Define a collection of `Differentiable` functions that are heap-allocated
-        //  - Note that it's not possible to construct this vector with a static polymorphic type
+        //  - See [CannotMonomorphizeDifferentiableInVecTest]
         let functions: Vec<Box<dyn Differentiable>> = vec![
             Box::new(Trigonometric::Sine),
             Box::new(Trigonometric::Cosine),
@@ -159,3 +159,20 @@ mod tests {
         }
     }
 }
+
+/// This test shows that if one wants to construct a container ([Vec] in this case) of
+/// [Differentiable] instances, it cannot be done with a *static polymorphic type*.
+///
+/// # Example
+/// ```compile_fail
+/// use rust_examples::dispatch::{Differentiable, Trigonometric};
+///
+/// let _: Vec<Differentiable> = vec![Trigonometric::Sine, Trigonometric::Cosine];
+/// ```
+///
+/// The *size* of this heterogeneous container cannot be known at compile time - this issue is that
+/// the compiler tries to monomorphize [Differentiable] items in the [Vec] but each one might be
+/// different and the collection is dynamic, hence the unknown size.
+///
+/// In consequence, here one **must** use heap-allocated `dyn` instances (i.e. dynamic dispatch)!
+pub struct CannotMonomorphizeDifferentiableInVecTest;
