@@ -1,8 +1,13 @@
+//! This module contains an example of
+//! [Algebraic Data Type (ADT)](https://en.wikipedia.org/wiki/Algebraic_data_type) and the
+//! concept of [pattern matching](https://en.wikipedia.org/wiki/Pattern_matching) which is commonly
+//! used to work with ADTs.
+
 /// An enum representing an Binary Tree Algebraic Data Type (ADT)
 ///
 /// This enum defined two distinct types (variants), each of different shape and size:
-///   1. The `Leaf` representing a leaf node that wraps `(key, ref data)`
-///   2. Struct `Node` representing an inner node with key and reference to underlying data.
+///   1. The [Tree::Leaf] representing a leaf node that wraps `(key, ref data)`
+///   2. Variant [Tree::Node] representing an inner node with key and reference to underlying data.
 ///      Additionally, inner nodes contain references to two heap-allocated child trees.
 ///
 /// Notice that the reference to the data must live at least as long as an instance of a tree.
@@ -18,9 +23,9 @@ pub enum Tree<'a, K, V> {
     },
 }
 
-// Note: By not requiring `K` to be `PartialEq` on the `Tree` type itself, we
-// allow users to create tree instances (which is totally valid) but without
-// the option to lookup data by keys.
+/// Note: By not requiring `K` to be [PartialEq] on the [Tree] type itself, we
+/// allow users to create tree instances (which is totally valid) but without
+/// the option to lookup data by keys.
 impl<'a, K: PartialEq + Eq, V> Tree<'a, K, V> {
     /// Lookup method that returns either:
     ///   - reference to the underlying data if the `lookup_key` was found
@@ -105,3 +110,25 @@ mod test {
         assert_eq!(None, tree.search(&7));
     }
 }
+
+/// This test demonstrates that in Rust all *self-referential* structures must have size known at
+/// compile time. This means that such structures *cannot own* data of type `Self` but rather have
+/// to indirectly refence these via some sort of a pointer.
+///
+/// # Example
+/// ```compile_fail
+/// enum PList<T> {
+///     Nil,
+///     Cons(T, Self),
+/// }
+/// ```
+///
+/// In order to make the example above compile, one would have to use some sort of indirection for
+/// the `Self` owned by the `Cons` variant. This indirection can be realized by either
+///  * a refence to stack-allocated data (`&`)
+///  * a refence to heap-allocated data ([Box])
+///  * a refence counting pointer ([std::rc::Rc])
+///
+/// or similar pointer-like structure which has *defined size* - i.e. is known not to be
+/// infinite (of unbounded memory).
+pub struct SelfReferentialStructureTest;
