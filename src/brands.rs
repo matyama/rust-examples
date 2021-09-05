@@ -9,7 +9,17 @@ use std::marker::PhantomData;
 
 /// Lifetime wrapper which makes `'id` *invariant* and has no size.
 ///
-/// # Example
+/// The invariance of `'id` (resp. [InvariantLifetime]) comes from the underlying raw pointer type
+/// `*mut &'id ()` - see [the docs](https://doc.rust-lang.org/reference/subtyping.html#variance).
+///
+/// Zero size is achieved via the usage of opaque type [PhantomData] which only carries the type
+/// information until the compilation and then is "compiled away".
+///
+/// Note that the *invariance* of `'id` (resp. [InvariantLifetime]) means that one cannot change
+/// the brand (`'id`) of [BrandedIndex] or [BrandedVec] via
+/// [*subtyping*](https://doc.rust-lang.org/reference/subtyping.html).
+///
+/// # Example: Size Test
 /// ```
 /// use rust_examples::brands::InvariantLifetime;
 ///
@@ -93,6 +103,13 @@ pub struct BrandedVec<'id, T> {
 /// assert_eq!(size_of::<BrandedVec<'_, u8>>(), size_of::<Vec<u8>>());
 /// ```
 impl<'id, T> BrandedVec<'id, T> {
+    /// Construct new [BrandedVec] from given [Vec] and run a closure `f` with it.
+    ///
+    /// `for<'a>` here is an example of *rank-2 polymorphism*, meaning that the closure given
+    /// by `f` must be valid for any choice of `'a`, not just `'id`.
+    ///
+    /// So `make` here is allowed to "pick" a fresh lifetime `'id` for each new [BrandedVec] but
+    /// the closure `f`, when it receives this branded vector, must treat the `'id` brand opaquely.
     pub fn make<R>(inner: Vec<T>, f: impl for<'a> FnOnce(BrandedVec<'a, T>) -> R) -> R {
         f(Self {
             inner,

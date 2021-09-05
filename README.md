@@ -14,6 +14,8 @@ This repository contains support materials for Rust tech-talks explaining variou
 	* Failure effects as types: `Option` instead of `null` pointer,
 		`Result` instead of recoverable exceptions
 	* (Bounded) Parametric polymorphism
+    * Rank-2 polymorphism
+    * Subtyping and variance
 	* Zero-cost abstraction
 	* Types as carriers of (static) semantics
 * Metaprogramming:
