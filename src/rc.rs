@@ -1,27 +1,40 @@
+//! This module presents various kinds of pointers and their behaviour under [Clone].
+//!
+//! The example covered in tests demonstrates the comparison between
+//!  1. Shared references that can be simply cloned (*shallow copied*)
+//!  1. [Box] pointer to heap data that, because they are *owned*, delegate cloning to the owned
+//!     instance (i.e. are potentially *deep copied*)
+//!  1. [Rc] smart pointer which implements [Clone] by imcrementing reference counter and returning
+//!     a cheap copy of itself with the same data reference (i.e. *shallow copy* at the cost of an
+//!     additional counter)
 use std::fmt::Debug;
 use std::rc::Rc;
 
+/// Thin wrapper around [usize] serving as an internal counter for the number of clones
 #[derive(Debug, Default)]
-struct Data(usize);
+pub struct Data(usize);
 
-// Custom clone implementation in which new data have counter incremented by one
+/// Custom clone implementation for [Data] in which new data have counter incremented by one
 impl Clone for Data {
     fn clone(&self) -> Self {
         Self(self.0 + 1)
     }
 }
 
-// Container is `Clone` because `Data` are `Clone` and so are `Box`, `Rc` and references
+/// Container for [Data] allocated and owned in various ways.
+///
+/// This class can derive [Clone] because [Data] are [Clone] and so are [Box], [Rc] and shared
+/// references `&'a`.
 #[derive(Clone, Debug)]
-struct Container<'a> {
-    // Owned data located on the stack.
-    owned: Data,
-    // Immutably shared data located on the stack that must outlive container's lifetime.
-    stack_shared: &'a Data,
-    // Pointer to owned data located on the heap.
-    heap_owned: Box<Data>,
-    // Reference counter poining to shared data located on the heap.
-    heap_shared: Rc<Data>,
+pub struct Container<'a> {
+    /// Owned data located on the *stack*
+    pub owned: Data,
+    /// Immutably shared data located on the *stack* that must outlive container's lifetime `'a`
+    pub stack_shared: &'a Data,
+    /// Pointer to owned data located on the *heap*
+    pub heap_owned: Box<Data>,
+    /// Reference counting pointer to shared data located on the *heap*
+    pub heap_shared: Rc<Data>,
 }
 
 #[cfg(test)]
