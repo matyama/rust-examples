@@ -1,5 +1,9 @@
-/// Declarative macro that **substitutes** call side with one of the expressions the head of which
-/// matches the call pattern.
+//! This module contains examples of *declarative macros*.
+//!
+//! Declarative macros present a way how to *substitute* call side expressions with another
+//! expression based on matching pattern in a type-safe manner.
+
+/// Macro that defines "approximately equal" for expressions interpreted as [f64].
 ///
 /// Contrary to passing arguments to a function, `$x` is here directly substituted for the calling
 /// expression. Moreover, the *types* are not actualt Rust types but rather tokens in Rust syntax -
@@ -19,11 +23,15 @@ macro_rules! approx {
     };
 }
 
+/// Type class that defines instances having a known maximum value
 pub trait MaxValue {
+    /// Accessor to the maximum value
     fn max_value() -> Self;
 }
 
-/// One very useful and common use case is to automate trait implementations. In this example we
+/// Macro that automates implementation of [MaxValue] for arbitrary types having `MAX` member.
+///
+/// Automating trait implementation is very useful and common use case. In this example we
 /// create a *template* implementation for [MaxValue] for an arbitrary type `$t`.
 ///
 /// Note that macros are compile-time safe because they just substitute actual pieces of code at
@@ -67,6 +75,7 @@ macro_rules! count {
     };
 }
 
+/// Simple macro for replacing any token `$_t` with expression `$sub`
 #[macro_export]
 macro_rules! substitute {
     ($_t:tt $sub:expr) => {

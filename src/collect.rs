@@ -1,10 +1,19 @@
+//! This module includes Rust's implementation of *traversable* types.
+//!
+//! [Traverse](https://typelevel.org/cats/typeclasses/traverse.html) is a *type class* which
+//! threats an effect through a collection (or another wrapping context) and "turns the effect
+//! inside out".
+//!
+//! Rust implements pattern via combination of `map` (to apply the effect) followed by `collect`
+//! which is available for [std::iter::FromIterator] instances (in Scala Cats this is referred to
+//! as `sequence`).
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{BufReader, Result};
 use std::path::Path;
 
 /// Traverse a collection of input values and apply an effect to item that may fail (take the
-/// first character from each string slice, resulting in an `Option<char>`).
+/// first character from each string slice, resulting in an [`Option<char>`](Option)).
 ///
 /// Here the *magic* is the sequencing of these effects via `collect`. This is possible
 /// because [std::iter::FromIterator] is implemented for the `Option` type, allowing for

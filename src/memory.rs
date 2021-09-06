@@ -1,4 +1,4 @@
-//! Examples in this module present how the concepts of **Ownership** and **Borrowing** work in
+//! Examples in this module present how the concepts of *Ownership* and *Borrowing* work in
 //! Rust.
 //!
 //! In *safe* Rust one cannot write and compile a program that has any of the following:
