@@ -1,8 +1,27 @@
+//! This module presents several possibilities of how to handle errors in Rust.
+//!
+//! In general, there are two
+//! [kinds of errors](https://doc.rust-lang.org/book/ch09-00-error-handling.html):
+//!  1. *Recoverable errors* - those are contexts in which there is a possibility to react and
+//!     correct the situation (e.g. by substituing default value or calling error handler)
+//!  1. *Unrecoverable errors* - these are unexpected situations which cannot be handled by an
+//!     application or library resulting in a crash of the program
+//!
+//! Naturally, Rust promotes types like [Option] and [Result] to mitigate the amount of possible
+//! non-recoverable situations.
+
+/// This function computes `num / d` in a *naive* way that causes the program to *panic* if `d = 0`
 pub fn naive_div(num: i32, d: i32) -> i32 {
     num / d
 }
 
-// Note that std already contians `i32::checked_div`
+/// This version of division models the error case (`d = 0`) by an [Option].
+///
+/// An option is a context in which a value might be present ([`Some`](Option::Some) variant) or
+/// missing ([`None`](Option::None) variant). Rust std library's API implements an [Option] as a
+/// [Monad](https://en.wikipedia.org/wiki/Monad_(functional_programming)).
+///
+/// Note that std already contians [i32::checked_div] which does the same thing as this function.
 pub fn maybe_div(num: i32, d: i32) -> Option<i32> {
     if d != 0 {
         Some(num / d)
@@ -11,6 +30,21 @@ pub fn maybe_div(num: i32, d: i32) -> Option<i32> {
     }
 }
 
+/// This version of division is somewhat artificial but demonstrates another error context, the
+/// [Result].
+///
+/// [Result] is like an [Option] as it represents an error effect but with the error case being an
+/// explicit type (i.e. more informative than plain [`None`](Option::None)). Note that it is also
+/// modeled as a *Monad*.
+///
+/// In this example we get the divisor `d` as a string slice so we have to parse it first.
+/// Therefore there can be three resulting cases:
+///  1. a [`Ok`](Result::Ok) result when parsing succeeds and `d` is non-zer
+///  1. an [`Err`](Result::Err) indicating that `d` was zero
+///  1. finally a different [`Err`](Result::Err) when parsing fails
+///
+/// Note that here we use simple [String] to differentiate the error cases but once would typically
+/// use custom `enum` with errors as variants.
 pub fn explained_div(num: i32, d: &str) -> Result<i32, String> {
     match d.parse::<i32>() {
         Ok(div) if div != 0 => Ok(num / div),
