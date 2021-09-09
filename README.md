@@ -16,6 +16,7 @@ This repository contains support materials for Rust tech-talks explaining variou
 	* (Bounded) Parametric polymorphism
     * Rank-2 polymorphism
     * Subtyping and variance
+    * Constant generics
 	* Zero-cost abstraction
 	* Types as carriers of (static) semantics
 * Metaprogramming:

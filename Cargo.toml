@@ -16,6 +16,10 @@ edition = "2018"
 #  - Additionally, install and run via https://crates.io/crates/cargo-criterion
 criterion = "0.3"
 
+# Property-based test framework for Rust - https://github.com/BurntSushi/quickcheck
+quickcheck = "1"
+quickcheck_macros = "1"
+
 # Fixture-based test framework for Rust: https://github.com/la10736/rstest
 rstest = "0.11"
 
