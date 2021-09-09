@@ -4,6 +4,10 @@ use std::cmp::max;
 const THREE_HALFS: f32 = 1.5;
 
 /// Approximates the inverse square root of given number.
+///
+/// Note that this a port of the original *C* implementation and as such it is generally *unsafe*.
+/// Calling this fuction with a negative [f32], zero, nan or infinity will result in a panic (for
+/// these is the *inverse square root* undefined).
 pub fn rsqrt(number: f32) -> f32 {
     let x2 = number * 0.5;
     let mut y = number;
@@ -39,6 +43,22 @@ pub fn rsqrt(number: f32) -> f32 {
 pub struct PositiveFloat(f32);
 
 impl PositiveFloat {
+    /// Constructs new [PositiveFloat] from given [f32] only if:
+    ///  * it is sign positive
+    ///  * is a *normal* float value (i.e. not a zero, nan or infinity)
+    ///
+    /// Note that this factory ensures the safety of [PositiveFloat::fast_rsqrt] as it makes the
+    /// illegal states mentioned above *unrepresentable*.
+    ///
+    /// # Example
+    /// ```
+    /// use rust_examples::rsqrt::PositiveFloat;
+    ///
+    /// assert_eq!(PositiveFloat::new(-4.2), None);
+    /// assert_eq!(PositiveFloat::new(0.0), None);
+    /// assert_eq!(PositiveFloat::new(f32::NAN), None);
+    /// assert_eq!(PositiveFloat::new(f32::INFINITY), None);
+    /// ```
     #[inline]
     pub fn new(v: f32) -> Option<Self> {
         if v.is_sign_positive() && v.is_normal() {
@@ -48,6 +68,7 @@ impl PositiveFloat {
         }
     }
 
+    /// Retrieves inner [f32] value
     #[inline]
     pub fn inner(&self) -> f32 {
         self.0
@@ -60,7 +81,15 @@ impl PositiveFloat {
         Self(self.0.sqrt().recip())
     }
 
-    /// Approximates the inverse square root of given number
+    /// Approximates the inverse square root of given number.
+    ///
+    /// This implementation is safe in the sense that by the construction of [PositiveFloat], it is
+    /// not possible to call [PositiveFloat::fast_rsqrt] on any invalid value: negative floats,
+    /// zero, nan or infinity.
+    ///
+    /// Constant generic parameter `ITERS` determines the number of iterations of the Newton's
+    /// method used to find the approximation. Note that despite the fact that it is [usize], the
+    /// implementation executes at least one iteration even if it is set to `0`.
     pub fn fast_rsqrt<const ITERS: usize>(&self) -> Self {
         let x2 = self.0 * 0.5;
         let i = self.0.to_bits();
