@@ -119,7 +119,7 @@ impl<'id, T> BrandedVec<'id, T> {
 
     /// Appends given `value` to this [BrandedVec] and returns [BrandedIndex] of this item which is
     /// bound to `self`. Since [BrandedVec] can only be appended to, this [BrandedIndex] is
-    /// quaranteed to *always* be within bounds.
+    /// guaranteed to *always* be within bounds.
     pub fn push(&mut self, value: T) -> BrandedIndex<'id> {
         let idx = self.inner.len();
         self.inner.push(value);
