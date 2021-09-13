@@ -10,6 +10,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+derive_more = "0.99"
 
 [dev-dependencies]
 # Criterion Benchmarks - https://bheisler.github.io/criterion.rs/book/criterion_rs.html

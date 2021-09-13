@@ -1,4 +1,5 @@
 //! Example of [Fast inverse square root](https://en.wikipedia.org/wiki/Fast_inverse_square_root).
+use derive_more::{Add, Mul};
 use std::cmp::max;
 
 const THREE_HALFS: f32 = 1.5;
@@ -39,7 +40,11 @@ pub fn rsqrt(number: f32) -> f32 {
 ///
 /// assert_eq!(size_of::<PositiveFloat>(), size_of::<f32>());
 /// ```
-#[derive(Debug, PartialEq)]
+/// # Automatic derivation or arithmetic operators
+/// Notice that some of impls on [PositiveFloat] are automatically derived using
+/// [`derive_more`](https://crates.io/crates/derive_more).
+#[derive(Clone, Copy, Debug, Add, Mul, PartialEq)]
+#[mul(forward)]
 pub struct PositiveFloat(f32);
 
 impl PositiveFloat {
@@ -66,6 +71,11 @@ impl PositiveFloat {
         } else {
             None
         }
+    }
+
+    #[inline]
+    pub fn from_square(x: f32) -> Self {
+        Self(x * x)
     }
 
     /// Retrieves inner [f32] value
@@ -105,6 +115,92 @@ impl PositiveFloat {
     }
 }
 
+/// Type alias for 3D vector represented as 3-tuple of [f32]
+pub type Vec3D = (f32, f32, f32);
+
+/// This trait is a typeclass for all vectors that are normalized via a fast (approximate) inverse
+/// square root
+pub trait FastNormalize {
+    /// Normalization return type
+    type NormVec;
+
+    /// Normalize this vector and return [`NormVec`](Self::NormVec)
+    fn normalize(&self) -> Self::NormVec;
+}
+
+/// This implementation of [FastNormalize] uses a [`fast_rsqrt<1>`](PositiveFloat::fast_rsqrt) to
+/// compute compute the invese square root of `x^2 + y^2 + z^2` of the components of the initial
+/// vector.
+///
+/// Because the components must be converted to [PositiveFloat]s, additional checks are
+/// necessary to validate the inputs. Moreover, because the validation might fail, the return type
+/// must be wrapped into an [Option].
+impl FastNormalize for Vec3D {
+    type NormVec = Option<Vec3D>;
+
+    fn normalize(&self) -> Self::NormVec {
+        let &(x, y, z) = self;
+
+        if !x.is_normal() || !y.is_normal() || !z.is_normal() {
+            return None;
+        }
+
+        let squares_sum = PositiveFloat::from_square(x)
+            + PositiveFloat::from_square(y)
+            + PositiveFloat::from_square(z);
+
+        let recip_norm = squares_sum.fast_rsqrt::<1>().inner();
+
+        Some((x * recip_norm, y * recip_norm, z * recip_norm))
+    }
+}
+
+/// Type that represents *normal* [f32] numbers. This excludes numbers that are
+///  - NaN
+///  - Infinite
+///  - Zero
+///  - Subnormal
+pub struct Float(f32);
+
+impl Float {
+    /// Constructs [Float] only if `v` is *normal*
+    #[inline]
+    pub fn new(v: f32) -> Option<Self> {
+        if v.is_normal() {
+            Some(Self(v))
+        } else {
+            None
+        }
+    }
+
+    /// Computes the square of the inner value of `self` and returns it as a [PositiveFloat]
+    #[inline]
+    pub fn square(&self) -> PositiveFloat {
+        PositiveFloat::from_square(self.0)
+    }
+}
+
+/// Optimized implementation of [FastNormalize] for 3D vector of [Float]s.
+///
+/// In this implementation we know that [Float] is non-zero, not nan and not infinity, so the
+/// squares are always [PositiveFloat]s. Therefore we can skip the checks on the components of the
+/// input vector.
+impl FastNormalize for (Float, Float, Float) {
+    type NormVec = Self;
+
+    fn normalize(&self) -> Self::NormVec {
+        let (x, y, z) = self;
+        let recip_norm = (x.square() + y.square() + z.square())
+            .fast_rsqrt::<1>()
+            .inner();
+        (
+            Float(x.0 * recip_norm),
+            Float(y.0 * recip_norm),
+            Float(z.0 * recip_norm),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -118,8 +214,10 @@ mod tests {
     #[rstest]
     #[case::nan(f32::NAN, None)]
     #[case::inf(f32::INFINITY, None)]
+    #[case::neg_inf(f32::NEG_INFINITY, None)]
     #[case::zero(0.0, None)]
     #[case::neg(-1.0, None)]
+    #[case::one(1.0, Some(PositiveFloat(1.0)))]
     #[case::pos(4.2, Some(PositiveFloat(4.2)))]
     fn positive_float(#[case] number: f32, #[case] expected: Option<PositiveFloat>) {
         assert_eq!(PositiveFloat::new(number), expected);
@@ -162,5 +260,47 @@ mod tests {
         } else {
             TestResult::discard()
         }
+    }
+
+    #[rstest]
+    #[case(1.0, 1.0, 1.0, true)]
+    #[case(1.0, 2.0, 3.0, true)]
+    #[case(4.2, -1.0, -1.0, true)]
+    #[case(0.0, 0.0, 0.0, false)]
+    #[case(1.0, f32::INFINITY, 2.0, false)]
+    #[case(1.0, f32::NEG_INFINITY, 2.0, false)]
+    #[case(1.0, f32::NAN, 2.0, false)]
+    fn fast_normalization(#[case] x: f32, #[case] y: f32, #[case] z: f32, #[case] some: bool) {
+        let v_norm = (x, y, z).normalize();
+
+        assert_eq!(v_norm.is_some(), some);
+
+        if let Some((x, y, z)) = v_norm {
+            // Compute and check conventional norm
+            let norm = (x * x + y * y + z * z).sqrt();
+
+            assert!(
+                approx!(norm, 1.0; EPS),
+                "Norm should be approx. one, got: {}",
+                norm
+            );
+        }
+    }
+
+    #[rstest]
+    #[case(Float(1.0), Float(1.0), Float(1.0))]
+    #[case(Float(1.0), Float(2.0), Float(3.0))]
+    #[case(Float(4.2), Float(-1.0), Float(-1.0))]
+    fn fast_safe_normalization(#[case] x: Float, #[case] y: Float, #[case] z: Float) {
+        let (x, y, z) = (x, y, z).normalize();
+
+        // Compute and check conventional norm
+        let norm = (x.square() + y.square() + z.square()).inner().sqrt();
+
+        assert!(
+            approx!(norm, 1.0; EPS),
+            "Norm should be approx. one, got: {}",
+            norm
+        );
     }
 }
