@@ -12,6 +12,7 @@ pub mod dispatch;
 pub mod errors;
 pub mod macros;
 pub mod memory;
+pub mod orphan;
 pub mod rc;
 pub mod rsqrt;
 pub mod typing;

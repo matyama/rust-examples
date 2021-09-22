@@ -19,6 +19,7 @@ This repository contains support materials for Rust tech-talks explaining variou
     * Constant generics
 	* Zero-cost abstraction
 	* Types as carriers of (static) semantics
+    * Coherence and orphan instances
 * Metaprogramming:
 	* Declarative macros
 * Functional design patterns:
