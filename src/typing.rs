@@ -15,6 +15,12 @@
 //!
 //! Note that one would typically realize these as implementations of [PartialOrd] or [Ord] but we
 //! keep it simple and implement the comparison as plain function.
+//!
+//! Also note that `std` actually defines a safe memory interpretation [f64::to_bits] so this
+//! example is somewhat artificial.
+//!
+//! Last few examples describe the [top](https://en.wikipedia.org/wiki/Top_type) and
+//! [bottom](https://en.wikipedia.org/wiki/Bottom_type) type realized in Rust's type system.
 use std::cmp::Ordering;
 
 /// Naive *positive* [f64] comparison function.
@@ -161,6 +167,53 @@ pub fn safe_cmp_f64(a: Positive, b: Positive) -> Ordering {
     // in this block of code. Note that any crash in this scope results in an undefined behavior!
     unsafe { a.as_u32().cmp(&b.as_u32()) }
 }
+
+/// Structure that defines single field which has the type of the
+/// [*top type*](https://en.wikipedia.org/wiki/Top_type) in Rust.
+///
+/// Because Rust's type system lacks central hierarchy and polymorphism is realized by (not only)
+/// [bounded parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism), the
+/// *top type* is actually the most generic type parameter - a type parameter which can be realized
+/// by any type value.
+///
+/// One might think that the most generic type parameter is simply `<T>` but in Rust this
+/// implicitly adds a bound that `T: Sized`. Therefore the most generic version is `<T: ?Sized>`
+/// which relaxes this restriction.
+pub struct TopTypeExample<T: ?Sized> {
+    pub top_type: T,
+}
+
+/// This example presents several constructs which represent an empty set of values.
+///
+/// The, so far unstable, type [`!`](!) is Rust's version of the
+/// [*bottom type*](https://en.wikipedia.org/wiki/Bottom_type).
+///
+/// # Example: Never type
+/// The *never_type* [`!`](!) shown below cannot be instantiated as it represents no actual value.
+/// ```compile_fail
+/// struct Void {
+///     bottom_type: !,
+/// }
+/// ```
+///
+/// # Example: Enum with no variants
+/// Another example of a type which can't be instantiated is an `enum` with no variant.
+/// ```
+/// enum Void {}
+/// ```
+///
+/// # Example: Declarative macros
+/// There's a reason why *macros* end with the never type [`!`](!) - macros are language constructs
+/// which are *replaced* by the code snippet they define at compilation time. Therefore there is no
+/// actual value they represent by themself, just like [`!`](!).
+/// ```
+/// println!("Rust");
+/// ```
+///
+/// # Example: Other constructs
+/// There are other language constructs which result in no value. These are typically statements
+/// like single branch `if` or `return` an `break`.
+pub struct BottomTypeExample;
 
 #[cfg(test)]
 mod tests {

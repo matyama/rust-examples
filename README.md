@@ -26,6 +26,7 @@ cargo doc --open
 	* Zero-cost abstraction
 	* Types as carriers of (static) semantics
   * Coherence and orphan instances
+  * Top and bottom types
 * Metaprogramming:
 	* Declarative macros
 * Functional design patterns:
@@ -37,7 +38,8 @@ cargo doc --open
 1. [`errors`](src/errors.rs) - exceptions as local values, effect types
 	 `Option` and `Result`, pattern matching
 1. [`typing`](src/typing.rs) - zero-cost abstraction, compile-time
-	 semantics, statically checked invariants of unsafe code
+	 semantics, statically checked invariants of unsafe code, top and
+	 bottom types in Rust
 1. [`adts`](src/adts.rs) - algebraic data types, self-referential types,
 	 pattern matching
 1. [`dispatch`](src/dispatch.rs) - monomorphization and static vs
