@@ -1,6 +1,14 @@
 //! This example demonstrates differences between a *static dispatch* and
 //! *dynamic dispatch* of method calls.
-
+//!
+//! Second point this example makes is that polymorphism without inheritance (i.e. other forms of
+//! polymorphism other than subclass polymorphism) is not a matter of static or dynamic dispatch.
+//!
+//! Notice that in both examples, that is `gradient_descent_static` and `gradient_descent_dynamic`,
+//! there is no inheritance hierarchy and relation between [Quadratic] (a `struct`) and
+//! [Trigonometric] (an `enum`). The only link between them the typeclass [Differentiable] which
+//! encapsulates common behavior of types in the class of differentiable functions and makes both
+//! GD functions mentioned above polymorphic over this behavior.
 use std::boxed::Box;
 
 /// Interface of a real 1D differentiable function
@@ -35,8 +43,7 @@ impl Differentiable for Quadratic {
     }
 }
 
-#[allow(dead_code)]
-enum Trigonometric {
+pub enum Trigonometric {
     Sine,
     Cosine,
 }
