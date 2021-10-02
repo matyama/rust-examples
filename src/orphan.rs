@@ -159,7 +159,7 @@ mod tests {
 ///     }
 ///
 ///     // Sorts given entities using `Ord` implementation for `Entity` contained in this module
-///     pub fn sort(entities: &mut [Entity]) {
+///     pub fn prioritize(entities: &mut [Entity]) {
 ///         entities.sort();
 ///     }
 /// }
