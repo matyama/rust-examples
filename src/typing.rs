@@ -186,13 +186,21 @@ pub struct TopTypeExample<T: ?Sized> {
 /// This example presents several constructs which represent an empty set of values.
 ///
 /// The, so far unstable, type [`!`](!) is Rust's version of the
-/// [*bottom type*](https://en.wikipedia.org/wiki/Bottom_type).
+/// [*bottom type*](https://en.wikipedia.org/wiki/Bottom_type). From categorical point of view,
+/// this type is the [*initial object*](https://en.wikipedia.org/wiki/Initial_and_terminal_objects).
 ///
 /// # Example: Never type
 /// The *never_type* [`!`](!) shown below cannot be instantiated as it represents no actual value.
 /// ```compile_fail
 /// struct Void {
 ///     bottom_type: !,
+/// }
+///
+/// /// This function can never be called since [Void] type has no values to be passed in. One can
+/// /// view [absurd] as proposition `false => t` being true for arbitrary `t`, i.e. one can infer
+/// /// any (absurd) fact from false assumptions.
+/// fn absurd<T>(_: Void) -> T {
+///     unreachable!()
 /// }
 /// ```
 ///
@@ -214,6 +222,25 @@ pub struct TopTypeExample<T: ?Sized> {
 /// There are other language constructs which result in no value. These are typically statements
 /// like single branch `if` or `return` an `break`.
 pub struct BottomTypeExample;
+
+/// Structure that defines single field which has the type of the
+/// [*unit type*](https://en.wikipedia.org/wiki/Unit_type) in Rust.
+///
+/// The unit type has just single value an is *unique up to unique isomorphism*. In category theory
+/// it is also known as the
+/// [*terminal object*](https://en.wikipedia.org/wiki/Initial_and_terminal_objects) (alternatively
+/// the *final object*).
+///
+/// There is a unique morphism (function) from any other type to it as shown below and it servers
+/// as a unit for product types (tuples).
+/// ```
+/// fn unit<T>(_: T) -> () {
+///     ()
+/// }
+/// ```
+pub struct UnitTypeExample {
+    pub unit_type: (),
+}
 
 #[cfg(test)]
 mod tests {
