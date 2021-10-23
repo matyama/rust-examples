@@ -12,6 +12,15 @@
 ///
 /// Notice that the reference to the data must live at least as long as an instance of a tree.
 /// This ensures that nodes of any tree will always point to a valid memory section.
+///
+/// An enum is Rust's version of what in Haskell is called a *type constructor* while individual
+/// variants would be respective *data constructors*. For instance the definition of [Tree] below
+/// would roughly translate to the following Haskell code (Haskell is a GC language where all
+/// values are allocated on the heap so all the reference jugglinlg is hidden away and infinite
+/// data structures are possible and common):
+/// ```haskell
+/// data Tree k v = Leaf k v | Node { key :: k, data :: v, left :: (Tree k v), right :: (Tree k v) }
+/// ```
 #[derive(Debug)]
 pub enum Tree<'a, K, V> {
     Leaf(K, &'a V),
