@@ -8,6 +8,7 @@ extern crate quickcheck_macros;
 pub mod adts;
 pub mod brands;
 pub mod collect;
+pub mod dependent;
 pub mod dispatch;
 pub mod errors;
 pub mod macros;

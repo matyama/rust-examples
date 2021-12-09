@@ -24,7 +24,7 @@ cargo doc --open
     * Subtyping and variance
     * Constant generics
 	* Zero-cost abstraction
-	* Types as carriers of (static) semantics
+	* Dependent types (relation to Curry-Howard correspondence)
   * Coherence and orphan instances
   * Top and bottom types
 * Metaprogramming:
@@ -40,6 +40,7 @@ cargo doc --open
 1. [`typing`](src/typing.rs) - zero-cost abstraction, compile-time
 	 semantics, statically checked invariants of unsafe code, top and
 	 bottom types in Rust
+1. [`dependent`](src/dependent.rs) - dependent types, programs as proofs
 1. [`adts`](src/adts.rs) - algebraic data types, self-referential types,
 	 pattern matching
 1. [`dispatch`](src/dispatch.rs) - monomorphization and static vs

@@ -10,8 +10,8 @@
 
 #[derive(Debug)]
 pub struct Point2D {
-    x: f64,
-    y: f64,
+    pub x: f64,
+    pub y: f64,
 }
 
 pub fn take_ownership(p: Point2D) {
@@ -42,7 +42,7 @@ pub fn show_color(color: RGBColor) {
 
 #[derive(Debug)]
 pub struct Palette<'a> {
-    colors: &'a [RGBColor],
+    pub colors: &'a [RGBColor],
 }
 
 pub fn show_palette(palette: &Palette) {
