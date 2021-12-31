@@ -50,7 +50,6 @@ are fantastic!
 1. [`typing`](src/typing.rs) - zero-cost abstraction, compile-time
 	 semantics, statically checked invariants of unsafe code, top and
 	 bottom types in Rust
-1. [`dependent`](src/dependent.rs) - dependent types, programs as proofs
 1. [`adts`](src/adts.rs) - algebraic data types, self-referential types,
 	 pattern matching
 1. [`dispatch`](src/dispatch.rs) - monomorphization and static vs
@@ -64,3 +63,4 @@ are fantastic!
 1. [`brands`](src/brands.rs) - zero-cost abstraction, rank-2
 	 polymorphism, branded types, subtyping and variance
 1. [`orphan`](src/orphan.rs) - trait system, coherence and orphan rules
+1. [`dependent`](src/dependent.rs) - dependent types, programs as proofs
