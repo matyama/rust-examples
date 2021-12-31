@@ -1,13 +1,23 @@
 ![Rust](https://github.com/matyama/rust-examples/workflows/Rust/badge.svg)
 
 # Rust Examples
-This repository contains support materials for Rust tech-talks explaining
-various techniques and Rust specifics.
+This repository collects examples of various programming language
+concepts implemented in [Rust](https://www.rust-lang.org/) and generally
+introduces the language.
+
+All the examples are documented and might serve as support materials for
+future Rust tech-talks and presentations.
 
 For detailed code description generate and see the docs:
 ```bash
 cargo doc --open
 ```
+
+## Disclaimer
+Please note that these examples are a personal take on the subject (and
+sort of a learning playground for myself) and you should definitely check
+out the [official study materials](https://www.rust-lang.org/learn) which
+are fantastic!
 
 ## Topics and Concepts
 * *Static* vs *dynamic* dispatch
@@ -32,7 +42,7 @@ cargo doc --open
 * Functional design patterns:
 	* Traversable types implementing `FromIterator` and using `collect`
 
-## Modules
+## Module Overview
 1. [`memory`](src/memory.rs) - ownership and borrowing, aliasing xor
 	 mutability, lifetimes
 1. [`errors`](src/errors.rs) - exceptions as local values, effect types
