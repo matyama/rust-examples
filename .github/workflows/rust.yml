@@ -21,3 +21,13 @@ jobs:
       run: cargo clippy --all-features -- -D warnings
     - name: Run tests
       run: cargo test --all-features --no-fail-fast
+    - name: Build docs
+      run: |
+        cargo doc --no-deps
+        echo '<meta http-equiv="refresh" content="0;url=rust_examples">' > target/doc/index.html
+    - name: Deploy docs
+      uses: peaceiris/actions-gh-pages@v3
+      if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: target/doc
