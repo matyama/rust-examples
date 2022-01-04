@@ -8,10 +8,7 @@ introduces the language.
 All the examples are documented and might serve as support materials for
 future Rust tech-talks and presentations.
 
-For detailed code description generate and see the docs:
-```bash
-cargo doc --open
-```
+For detailed code description see the [docs](https://matyama.github.io/rust-examples/).
 
 ## Disclaimer
 Please note that these examples are a personal take on the subject (and
