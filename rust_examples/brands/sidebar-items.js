@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["BrandedIndex","Thin wrapper for [usize] which is bound to particular instance of a [BrandedVec] via `'id` and serves as an access token to the interior values."],["BrandedVec","Thin wrapper for [Vec] which can only be accessed via an associated [BrandedIndex]"],["InvariantLifetime","Lifetime wrapper which makes `'id` invariant and has no size."]]});

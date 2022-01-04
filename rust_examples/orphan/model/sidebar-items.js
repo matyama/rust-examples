@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Entity","Union type which defines two variants `X` and `Y`"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Container","Container for [Data] allocated and owned in various ways."],["Data","Thin wrapper around [usize] serving as an internal counter for the number of clones"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["collect_initials","Traverse a collection of input values and apply an effect to item that may fail (take the first character from each string slice, resulting in an `Option<char>`)."],["read_files","Traversing a [Result] works analogously to an [Option] since a result is basically an option where the `None` case is some more specific type."]]});

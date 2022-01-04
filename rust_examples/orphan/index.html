@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This module demonstrates Orphan rules and coherence of Rust’s trait system."><meta name="keywords" content="rust, rustlang, rust-lang, orphan"><title>rust_examples::orphan - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../rust_examples/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><h2 class="location">Module orphan</h2><div class="sidebar-elems"><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li></ul></div><div id="sidebar-vars" data-name="orphan" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">rust_examples</a>::<wbr><a class="mod" href="#">orphan</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/rust_examples/orphan.rs.html#1-184" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This module demonstrates <em>Orphan rules</em> and <em>coherence</em> of Rust’s trait system.</p>
+<h2 id="coherence" class="section-header"><a href="#coherence">Coherence</a></h2>
+<p><em>Coherence</em> can informally be understood as a property of trait implementations (typeclass
+instances) in which the execution semantics does not change with different scopes (contexts).</p>
+<p><em>This definition paraphrases a definition from this
+<a href="http://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/">post</a>.</em></p>
+<h2 id="global-uniqueness-of-instances" class="section-header"><a href="#global-uniqueness-of-instances">Global uniqueness of instances</a></h2>
+<p>This property states that for any type, there is at most one instance resolution for a given
+type class. An instance violating this property is called the
+<a href="https://wiki.haskell.org/Orphan_instance"><em>orphan instance</em></a>.</p>
+<p>In Rust this property is achieved by the <em>orphan rules</em> which state that at least one of the
+following must hold for any crate and <code>impl Type for Trait</code>:</p>
+<ol>
+<li><code>Type</code> is owned (defined) by the implementing crate</li>
+<li><code>Trait</code> is owned (defined) by the implementing crate</li>
+</ol>
+<p><em>For more see <a href="https://rust-lang.github.io/chalk/book/clauses/coherence.html">Chalk’s docs</a>.</em></p>
+<h2 id="example-orphan-rule" class="section-header"><a href="#example-orphan-rule">Example: Orphan rule</a></h2>
+<p>In the example below neither the type <a href="https://doc.rust-lang.org/1.57.0/alloc/vec/struct.Vec.html" title="Vec">Vec</a> nor the trait <a href="https://doc.rust-lang.org/1.57.0/alloc/string/trait.ToString.html" title="ToString">ToString</a> is owned by this crate, so
+the code would create an <em>orphan instance</em> which is disallowed and won’t compile.</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="kw">struct</span> <span class="ident">Data</span>(<span class="ident">String</span>);
+
+<span class="kw">impl</span> <span class="ident">ToString</span> <span class="kw">for</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Data</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
+        <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">data</span><span class="op">|</span> <span class="ident">data</span>.<span class="number">0</span>.<span class="ident">clone</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">join</span>(<span class="string">&quot; &quot;</span>)
+    }
+}</code></pre></div>
+<h2 id="example-newtype-pattern" class="section-header"><a href="#example-newtype-pattern">Example: Newtype pattern</a></h2>
+<p>Typical solution to the problem above is the <a href="https://wiki.haskell.org/Newtype"><em>newtype</em></a>
+pattern.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">struct</span> <span class="ident">Data</span>(<span class="ident">String</span>);
+
+<span class="comment">// The *newtype* for `Vec&lt;Data&gt;`</span>
+<span class="kw">struct</span> <span class="ident">DataVec</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Data</span><span class="op">&gt;</span>);
+
+<span class="kw">impl</span> <span class="ident">ToString</span> <span class="kw">for</span> <span class="ident">DataVec</span> {
+    <span class="kw">fn</span> <span class="ident">to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">data</span><span class="op">|</span> <span class="ident">data</span>.<span class="number">0</span>.<span class="ident">clone</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">join</span>(<span class="string">&quot; &quot;</span>)
+    }
+}</code></pre></div>
+<p>In this case <code>DataVec</code> is a new type defined in this crate which is enough to satisfy the
+orphan rules.</p>
+<h2 id="discussion" class="section-header"><a href="#discussion">Discussion</a></h2><h3 id="cons" class="section-header"><a href="#cons">Cons</a></h3>
+<ul>
+<li>The ergonomics of defining and using new types is not great. First there’s the obvious code
+bloat and more importandly the type system doesn’t simply generalize all the <code>impl</code>s of the
+wrapped type which leads to the <code>self.0</code> gymnastics.</li>
+<li>Someone might argue that for end applications it might be beneficial to dynamically change
+code behavior depending on the implementing module</li>
+</ul>
+<h3 id="pros" class="section-header"><a href="#pros">Pros</a></h3>
+<ul>
+<li>From a theoretical point of view, function’s behavior should not depend on the <em>scope</em> in
+which it is invoked but rather on the <em>type</em> on which it is called (i.e. types should fully
+determine behavior)</li>
+<li>This prevents subtle and hard to spot bugs such as the <em>Hash table problem</em> or ordering
+inversion in certain data structures</li>
+<li>Due to these rules <code>cargo</code> can resolve dependencies with two versions of the same crate.
+This increases the distribution of development in the Rust ecosystem (for instnance one does
+not have to wait for an update of crate X when updating Y when both depend on Z)</li>
+<li>For instance this allows adding extensions to the <code>std</code> crate without creating breaking
+changes (resulting in a minor or major version change)</li>
+<li>Future Rust could potentially support <em>Specialization</em> which would not be possible with
+orphan instances (i.e. allow safe ad-hoc behavior for typeclass instances which are strict
+subsets of more general ones defined elsewhere)</li>
+<li>The ergonomics of “newtypes” could be improved with something like <code>#[newtype_deriving]</code></li>
+</ul>
+</div></details><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="model/index.html" title="rust_examples::orphan::model mod">model</a></div><div class="item-right docblock-short"><p>Module that defines single data type called <code>Entity</code></p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="module_a/index.html" title="rust_examples::orphan::module_a mod">module_a</a></div><div class="item-right docblock-short"><p>Module which exposes an operation which depends on an instance of <a href="https://doc.rust-lang.org/1.57.0/core/cmp/trait.Ord.html" title="Ord">Ord</a> for <a href="model/enum.Entity.html" title="model::Entity">model::Entity</a></p>
+</div></div></div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.OrphanInstanceTest.html" title="rust_examples::orphan::OrphanInstanceTest struct">OrphanInstanceTest</a></div><div class="item-right docblock-short"><p>This test demonstrates that Rust disallows <em>Orphan Instances</em>.</p>
+</div></div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rust_examples" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script>
+</body></html>

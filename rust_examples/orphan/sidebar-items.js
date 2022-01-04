@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["model","Module that defines single data type called `Entity`"],["module_a","Module which exposes an operation which depends on an instance of [Ord] for [model::Entity]"]],"struct":[["OrphanInstanceTest","This test demonstrates that Rust disallows Orphan Instances."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["prioritize","Sorts given entities using [Ord] implementation for [Entity] contained in this module"]]});

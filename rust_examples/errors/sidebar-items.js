@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["explained_div","This version of division is somewhat artificial but demonstrates another error context, the [Result]."],["maybe_div","This version of division models the error case (`d = 0`) by an [Option]."],["naive_div","This function computes `num / d` in a naive way that causes the program to panic if `d = 0`"]]});
