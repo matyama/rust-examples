@@ -112,6 +112,7 @@ pub trait HList<N: Nat> {
 /// Alternatively, [HNil] repreents an empty [HList].
 pub struct HNil;
 
+/// [HNil] is an empty [HList] (i.e. of length `N = Zero`).
 impl HList<Zero> for HNil {}
 
 /// Structure representing a non-empty [HList] consisting of a head and tail.
@@ -138,6 +139,8 @@ impl<N: Nat, M: Nat + Pred<N>, H, T: HList<M>> HCons<N, M, H, T> {
     }
 }
 
+/// [`HCons<N, M, _, T>`](HCons) is a [HList] of length `N > 0` if `T` is a [HList] of length
+/// `M = N - 1`.
 impl<N: Nat, M: Nat + Pred<N>, H, T: HList<M>> HList<N> for HCons<N, M, H, T> {}
 
 #[cfg(test)]
