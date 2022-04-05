@@ -97,9 +97,8 @@ pub trait HList<N: Nat> {
     fn cons<H>(self, x: H) -> HCons<Succ<N>, N, H, Self>
     where
         Self: Sized,
-        //N: Pred<N, Succ<N>>,
     {
-        HCons(x, self, PhantomData::<Succ<N>>, PhantomData::<N>)
+        HCons(x, self, PhantomData, PhantomData)
     }
 
     /// Analogy to [`Vec::len`](Vec::len).
@@ -164,6 +163,7 @@ mod tests {
 
         assert_eq!(0, pred::<Zero, Zero>());
         assert_eq!(0, pred::<Zero, Succ<Zero>>());
+        assert_eq!(1, pred::<Succ<Zero>, Succ<Succ<Zero>>>());
     }
 
     #[test]
