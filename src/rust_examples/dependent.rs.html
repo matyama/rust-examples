@@ -323,9 +323,8 @@
     <span class="kw">fn</span> <span class="ident">cons</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">x</span>: <span class="ident">H</span>) -&gt; <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">N</span>, <span class="ident">H</span>, <span class="self">Self</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
-        <span class="comment">//N: Pred&lt;N, Succ&lt;N&gt;&gt;,</span>
     {
-        <span class="ident">HCons</span>(<span class="ident">x</span>, <span class="self">self</span>, <span class="ident">PhantomData</span>::<span class="op">&lt;</span><span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">PhantomData</span>::<span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>)
+        <span class="ident">HCons</span>(<span class="ident">x</span>, <span class="self">self</span>, <span class="ident">PhantomData</span>, <span class="ident">PhantomData</span>)
     }
 
     <span class="doccomment">/// Analogy to [`Vec::len`](Vec::len).</span>
@@ -390,6 +389,7 @@
 
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, <span class="ident">pred</span>::<span class="op">&lt;</span><span class="ident">Zero</span>, <span class="ident">Zero</span><span class="op">&gt;</span>());
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, <span class="ident">pred</span>::<span class="op">&lt;</span><span class="ident">Zero</span>, <span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">Zero</span><span class="op">&gt;</span><span class="op">&gt;</span>());
+        <span class="macro">assert_eq!</span>(<span class="number">1</span>, <span class="ident">pred</span>::<span class="op">&lt;</span><span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">Zero</span><span class="op">&gt;</span>, <span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">Zero</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
