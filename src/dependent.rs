@@ -41,6 +41,15 @@ impl<N: Nat> Nat for Succ<N> {
     }
 }
 
+/// Trait encoding a predecessor relation: "`Self` is a predecessor of `N`".
+pub trait Pred<N> {}
+
+/// [`Zero`](Zero) is a predecessor of [`Zero`](Zero).
+impl Pred<Zero> for Zero {}
+
+/// For each [`Succ<N: Nat>`](Succ) = N + 1 there is a predecessor `N: Nat`.
+impl<N: Nat> Pred<Succ<N>> for N {}
+
 /// A wrapper for [`Vec<A>`](Vec) which preserves the information about its size `N` at the type
 /// level (i.e. compilation time).
 ///
@@ -80,20 +89,23 @@ impl<N: Nat, A: Copy> Vector<N, A> {
     }
 }
 
-/// Trait representing a heterogeneous list, a.k.a [HList].
+/// Trait representing a heterogeneous list, a.k.a [HList] of length `N`.
 ///
 /// Contrary to an ordinary list, elements of an [HList] (resp. [HCons]) may vary in types.
-pub trait HList {
+pub trait HList<N: Nat> {
     /// Add given element to the front of this [HList].
-    fn cons<H>(self, x: H) -> HCons<H, Self>
+    fn cons<H>(self, x: H) -> HCons<Succ<N>, N, H, Self>
     where
         Self: Sized,
+        //N: Pred<N, Succ<N>>,
     {
-        HCons(x, self)
+        HCons(x, self, PhantomData::<Succ<N>>, PhantomData::<N>)
     }
 
     /// Analogy to [`Vec::len`](Vec::len).
-    fn len(&self) -> usize;
+    fn len(&self) -> usize {
+        N::lower()
+    }
 }
 
 /// Structure representing the null pointer at the end of each [HList].
@@ -101,17 +113,21 @@ pub trait HList {
 /// Alternatively, [HNil] repreents an empty [HList].
 pub struct HNil;
 
-impl HList for HNil {
-    #[inline]
-    fn len(&self) -> usize {
-        0
-    }
-}
+impl HList<Zero> for HNil {}
 
 /// Structure representing a non-empty [HList] consisting of a head and tail.
-pub struct HCons<H, T: HList>(pub H, pub T);
+///
+/// `N` encodes the length of this [HList] while `M = N - 1` is the length of the tail [HList].
+pub struct HCons<N, M, H, T>(
+    /// Head of this [HList].
+    pub H,
+    /// Tail of this [HList] which itself is a [HList] of length `M = N - 1`.
+    pub T,
+    PhantomData<N>,
+    PhantomData<M>,
+);
 
-impl<H, T: HList> HCons<H, T> {
+impl<N: Nat, M: Nat + Pred<N>, H, T: HList<M>> HCons<N, M, H, T> {
     #[inline]
     pub fn head(&self) -> &H {
         &self.0
@@ -123,12 +139,7 @@ impl<H, T: HList> HCons<H, T> {
     }
 }
 
-impl<H, T: HList> HList for HCons<H, T> {
-    #[inline]
-    fn len(&self) -> usize {
-        1 + self.tail().len()
-    }
-}
+impl<N: Nat, M: Nat + Pred<N>, H, T: HList<M>> HList<N> for HCons<N, M, H, T> {}
 
 #[cfg(test)]
 mod tests {
@@ -139,6 +150,20 @@ mod tests {
         // Instances of 0 and 1 from the inductive definition of natural numbers (Peano numbers)
         let _zero = Zero;
         let _one = Succ::<Zero>;
+    }
+
+    #[test]
+    fn pred() {
+        fn pred<M, N>() -> usize
+        where
+            N: Nat,
+            M: Nat + Pred<N>,
+        {
+            M::lower()
+        }
+
+        assert_eq!(0, pred::<Zero, Zero>());
+        assert_eq!(0, pred::<Zero, Succ<Zero>>());
     }
 
     #[test]
@@ -155,5 +180,45 @@ mod tests {
 
         let hlist = hlist.cons(1).cons("two").cons(true);
         assert_eq!(3, hlist.len());
+    }
+}
+
+/// Negative compilation tests for [Pred] relation.
+///
+/// # 0 is not a predecessor of 2
+/// ```compile_fail
+/// # use rust_examples::dependent::{Nat, Pred, Succ, Zero};
+/// # use rust_examples::dependent::NotPredTest;
+/// NotPredTest::check::<Zero, Succ<Succ<Zero>>();
+/// ```
+///
+/// # 1 is not a predecessor of 3
+/// ```compile_fail
+/// # use rust_examples::dependent::{Nat, Pred, Succ, Zero};
+/// # use rust_examples::dependent::NotPredTest;
+/// NotPredTest::check::<Succ<Zero>, Succ<Succ<Succ<Zero>>>>();
+/// ```
+///
+/// # 1 is not a predecessor of 0
+/// ```compile_fail
+/// # use rust_examples::dependent::{Nat, Pred, Succ, Zero};
+/// # use rust_examples::dependent::NotPredTest;
+/// NotPredTest::check::<Succ<Zero>, Zero>;
+/// ```
+///
+/// # 2 is not a predecessor of 1
+/// ```compile_fail
+/// # use rust_examples::dependent::{Nat, Pred, Succ, Zero};
+/// # use rust_examples::dependent::NotPredTest;
+/// NotPredTest::check::<Succ<Succ<Zero>>, Succ<Zero>>;
+/// ```
+pub struct NotPredTest;
+
+impl NotPredTest {
+    pub fn check<M, N>()
+    where
+        N: Nat,
+        M: Nat + Pred<N>,
+    {
     }
 }
