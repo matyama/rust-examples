@@ -159,6 +159,71 @@
 <span id="157">157</span>
 <span id="158">158</span>
 <span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
 </pre><pre class="rust"><code><span class="doccomment">//! This module includes Rust&#39;s approach to *dependent types*.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Informally, a dependent type is a type that depends of a value of (or a term from) another</span>
@@ -202,6 +267,15 @@
     }
 }
 
+<span class="doccomment">/// Trait encoding a predecessor relation: &quot;`Self` is a predecessor of `N`&quot;.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Pred</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {}
+
+<span class="doccomment">/// [`Zero`](Zero) is a predecessor of [`Zero`](Zero).</span>
+<span class="kw">impl</span> <span class="ident">Pred</span><span class="op">&lt;</span><span class="ident">Zero</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Zero</span> {}
+
+<span class="doccomment">/// For each [`Succ&lt;N: Nat&gt;`](Succ) = N + 1 there is a predecessor `N: Nat`.</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">Nat</span><span class="op">&gt;</span> <span class="ident">Pred</span><span class="op">&lt;</span><span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">N</span> {}
+
 <span class="doccomment">/// A wrapper for [`Vec&lt;A&gt;`](Vec) which preserves the information about its size `N` at the type</span>
 <span class="doccomment">/// level (i.e. compilation time).</span>
 <span class="doccomment">///</span>
@@ -241,20 +315,23 @@
     }
 }
 
-<span class="doccomment">/// Trait representing a heterogeneous list, a.k.a [HList].</span>
+<span class="doccomment">/// Trait representing a heterogeneous list, a.k.a [HList] of length `N`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Contrary to an ordinary list, elements of an [HList] (resp. [HCons]) may vary in types.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HList</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HList</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">Nat</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Add given element to the front of this [HList].</span>
-    <span class="kw">fn</span> <span class="ident">cons</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">x</span>: <span class="ident">H</span>) -&gt; <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">fn</span> <span class="ident">cons</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">x</span>: <span class="ident">H</span>) -&gt; <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">N</span>, <span class="ident">H</span>, <span class="self">Self</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
+        <span class="comment">//N: Pred&lt;N, Succ&lt;N&gt;&gt;,</span>
     {
-        <span class="ident">HCons</span>(<span class="ident">x</span>, <span class="self">self</span>)
+        <span class="ident">HCons</span>(<span class="ident">x</span>, <span class="self">self</span>, <span class="ident">PhantomData</span>::<span class="op">&lt;</span><span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">PhantomData</span>::<span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>)
     }
 
     <span class="doccomment">/// Analogy to [`Vec::len`](Vec::len).</span>
-    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span>;
+    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
+        <span class="ident">N::lower</span>()
+    }
 }
 
 <span class="doccomment">/// Structure representing the null pointer at the end of each [HList].</span>
@@ -262,17 +339,21 @@
 <span class="doccomment">/// Alternatively, [HNil] repreents an empty [HList].</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HNil</span>;
 
-<span class="kw">impl</span> <span class="ident">HList</span> <span class="kw">for</span> <span class="ident">HNil</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="number">0</span>
-    }
-}
+<span class="kw">impl</span> <span class="ident">HList</span><span class="op">&lt;</span><span class="ident">Zero</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HNil</span> {}
 
 <span class="doccomment">/// Structure representing a non-empty [HList] consisting of a head and tail.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">T</span>: <span class="ident">HList</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="ident">H</span>, <span class="kw">pub</span> <span class="ident">T</span>);
+<span class="doccomment">///</span>
+<span class="doccomment">/// `N` encodes the length of this [HList] while `M = N - 1` is the length of the tail [HList].</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">M</span>, <span class="ident">H</span>, <span class="ident">T</span><span class="op">&gt;</span>(
+    <span class="doccomment">/// Head of this [HList].</span>
+    <span class="kw">pub</span> <span class="ident">H</span>,
+    <span class="doccomment">/// Tail of this [HList] which itself is a [HList] of length `M = N - 1`.</span>
+    <span class="kw">pub</span> <span class="ident">T</span>,
+    <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>,
+    <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
+);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">T</span>: <span class="ident">HList</span><span class="op">&gt;</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">Nat</span>, <span class="ident">M</span>: <span class="ident">Nat</span> <span class="op">+</span> <span class="ident">Pred</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">H</span>, <span class="ident">T</span>: <span class="ident">HList</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">M</span>, <span class="ident">H</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">head</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">H</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
@@ -284,12 +365,7 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">T</span>: <span class="ident">HList</span><span class="op">&gt;</span> <span class="ident">HList</span> <span class="kw">for</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="number">1</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">tail</span>().<span class="ident">len</span>()
-    }
-}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">Nat</span>, <span class="ident">M</span>: <span class="ident">Nat</span> <span class="op">+</span> <span class="ident">Pred</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">H</span>, <span class="ident">T</span>: <span class="ident">HList</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">HList</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">M</span>, <span class="ident">H</span>, <span class="ident">T</span><span class="op">&gt;</span> {}
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
@@ -300,6 +376,20 @@
         <span class="comment">// Instances of 0 and 1 from the inductive definition of natural numbers (Peano numbers)</span>
         <span class="kw">let</span> <span class="ident">_zero</span> <span class="op">=</span> <span class="ident">Zero</span>;
         <span class="kw">let</span> <span class="ident">_one</span> <span class="op">=</span> <span class="ident">Succ</span>::<span class="op">&lt;</span><span class="ident">Zero</span><span class="op">&gt;</span>;
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">pred</span>() {
+        <span class="kw">fn</span> <span class="ident">pred</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">N</span><span class="op">&gt;</span>() -&gt; <span class="ident">usize</span>
+        <span class="kw">where</span>
+            <span class="ident">N</span>: <span class="ident">Nat</span>,
+            <span class="ident">M</span>: <span class="ident">Nat</span> <span class="op">+</span> <span class="ident">Pred</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>,
+        {
+            <span class="ident">M::lower</span>()
+        }
+
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, <span class="ident">pred</span>::<span class="op">&lt;</span><span class="ident">Zero</span>, <span class="ident">Zero</span><span class="op">&gt;</span>());
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, <span class="ident">pred</span>::<span class="op">&lt;</span><span class="ident">Zero</span>, <span class="ident">Succ</span><span class="op">&lt;</span><span class="ident">Zero</span><span class="op">&gt;</span><span class="op">&gt;</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -316,6 +406,46 @@
 
         <span class="kw">let</span> <span class="ident">hlist</span> <span class="op">=</span> <span class="ident">hlist</span>.<span class="ident">cons</span>(<span class="number">1</span>).<span class="ident">cons</span>(<span class="string">&quot;two&quot;</span>).<span class="ident">cons</span>(<span class="bool-val">true</span>);
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, <span class="ident">hlist</span>.<span class="ident">len</span>());
+    }
+}
+
+<span class="doccomment">/// Negative compilation tests for [Pred] relation.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # 0 is not a predecessor of 2</span>
+<span class="doccomment">/// ```compile_fail</span>
+<span class="doccomment">/// # use rust_examples::dependent::{Nat, Pred, Succ, Zero};</span>
+<span class="doccomment">/// # use rust_examples::dependent::NotPredTest;</span>
+<span class="doccomment">/// NotPredTest::check::&lt;Zero, Succ&lt;Succ&lt;Zero&gt;&gt;();</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # 1 is not a predecessor of 3</span>
+<span class="doccomment">/// ```compile_fail</span>
+<span class="doccomment">/// # use rust_examples::dependent::{Nat, Pred, Succ, Zero};</span>
+<span class="doccomment">/// # use rust_examples::dependent::NotPredTest;</span>
+<span class="doccomment">/// NotPredTest::check::&lt;Succ&lt;Zero&gt;, Succ&lt;Succ&lt;Succ&lt;Zero&gt;&gt;&gt;&gt;();</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # 1 is not a predecessor of 0</span>
+<span class="doccomment">/// ```compile_fail</span>
+<span class="doccomment">/// # use rust_examples::dependent::{Nat, Pred, Succ, Zero};</span>
+<span class="doccomment">/// # use rust_examples::dependent::NotPredTest;</span>
+<span class="doccomment">/// NotPredTest::check::&lt;Succ&lt;Zero&gt;, Zero&gt;;</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # 2 is not a predecessor of 1</span>
+<span class="doccomment">/// ```compile_fail</span>
+<span class="doccomment">/// # use rust_examples::dependent::{Nat, Pred, Succ, Zero};</span>
+<span class="doccomment">/// # use rust_examples::dependent::NotPredTest;</span>
+<span class="doccomment">/// NotPredTest::check::&lt;Succ&lt;Succ&lt;Zero&gt;&gt;, Succ&lt;Zero&gt;&gt;;</span>
+<span class="doccomment">/// ```</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">NotPredTest</span>;
+
+<span class="kw">impl</span> <span class="ident">NotPredTest</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">N</span><span class="op">&gt;</span>()
+    <span class="kw">where</span>
+        <span class="ident">N</span>: <span class="ident">Nat</span>,
+        <span class="ident">M</span>: <span class="ident">Nat</span> <span class="op">+</span> <span class="ident">Pred</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>,
+    {
     }
 }
 </code></pre></div>
