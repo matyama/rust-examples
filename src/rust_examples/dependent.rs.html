@@ -224,6 +224,9 @@
 <span id="222">222</span>
 <span id="223">223</span>
 <span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
 </pre><pre class="rust"><code><span class="doccomment">//! This module includes Rust&#39;s approach to *dependent types*.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Informally, a dependent type is a type that depends of a value of (or a term from) another</span>
@@ -338,6 +341,7 @@
 <span class="doccomment">/// Alternatively, [HNil] repreents an empty [HList].</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HNil</span>;
 
+<span class="doccomment">/// [HNil] is an empty [HList] (i.e. of length `N = Zero`).</span>
 <span class="kw">impl</span> <span class="ident">HList</span><span class="op">&lt;</span><span class="ident">Zero</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HNil</span> {}
 
 <span class="doccomment">/// Structure representing a non-empty [HList] consisting of a head and tail.</span>
@@ -364,6 +368,8 @@
     }
 }
 
+<span class="doccomment">/// [`HCons&lt;N, M, _, T&gt;`](HCons) is a [HList] of length `N &gt; 0` if `T` is a [HList] of length</span>
+<span class="doccomment">/// `M = N - 1`.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">Nat</span>, <span class="ident">M</span>: <span class="ident">Nat</span> <span class="op">+</span> <span class="ident">Pred</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">H</span>, <span class="ident">T</span>: <span class="ident">HList</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">HList</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HCons</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">M</span>, <span class="ident">H</span>, <span class="ident">T</span><span class="op">&gt;</span> {}
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
